@@ -29,6 +29,7 @@ private const val TASK_DURATIONS_ID = 401
 val CONTENT_AUTHORITY_URI: Uri = Uri.parse("content://$CONTENT_AUTHORITY")
 
 
+@Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
 class AppProvider: ContentProvider() {
 
     private val uriMatcher by lazy { buildUriMatcher() }
