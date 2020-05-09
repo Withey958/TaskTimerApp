@@ -13,7 +13,11 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
 
 private const val TAG = "MainActivity"
-class MainActivity : AppCompatActivity(), AddEditFragment.OnSaveClicked {
+private const val DIALOG_ID_CANCEL_EDIT = 1
+
+class MainActivity : AppCompatActivity(),
+    AddEditFragment.OnSaveClicked,
+    MainActivityFragment.OnTaskEdit {
 
     // Whether or not the activity is in two pane mode
     // ie running in landscape or on a tablet.
@@ -82,10 +86,22 @@ class MainActivity : AppCompatActivity(), AddEditFragment.OnSaveClicked {
             android.R.id.home -> {
                 Log.d(TAG,"onOptionsItemSelected up button pressed")
                 val fragment = supportFragmentManager.findFragmentById(R.id.task_details_container)
-                removeEditPane(fragment)
+//                removeEditPane(fragment)
+                if ((fragment is AddEditFragment) && fragment.isDirty()) {
+                    showConfirmationDialog(DIALOG_ID_CANCEL_EDIT,
+                    getString(R.string.cancelEditDiag_message),
+                    R.string.cancelEditDiag_positiveCaption,
+                    R.string.cancelEditDiag_negativeCaption)
+                } else {
+                    removeEditPane(fragment)
+                }
             }
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    override fun onTaskEdit(task: Task) {
+        taskEditRequest(task)
     }
 
     private fun taskEditRequest(task: Task?) {
@@ -107,6 +123,15 @@ class MainActivity : AppCompatActivity(), AddEditFragment.OnSaveClicked {
         val fragment = supportFragmentManager.findFragmentById(R.id.task_details_container)
         if (fragment == null || mTwoPane) {
             super.onBackPressed()
+        } else {
+            removeEditPane(fragment)
+        }
+
+        if ((fragment is AddEditFragment) && fragment.isDirty()) {
+            showConfirmationDialog(DIALOG_ID_CANCEL_EDIT,
+                getString(R.string.cancelEditDiag_message),
+                R.string.cancelEditDiag_positiveCaption,
+                R.string.cancelEditDiag_negativeCaption)
         } else {
             removeEditPane(fragment)
         }

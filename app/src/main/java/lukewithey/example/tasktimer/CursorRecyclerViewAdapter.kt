@@ -14,6 +14,25 @@ import kotlin.system.measureNanoTime
 class TaskViewHolder ( override val containerView: View) :
         RecyclerView.ViewHolder(containerView),
         LayoutContainer {
+    fun bind(task : Task, listener: CursorRecyclerViewAdapter.OnTaskClickListener) {
+        tli_name.text = task.name
+        tli_description.text = task.description
+        tli_edit.visibility = View.VISIBLE
+        tli_delete.visibility = View.VISIBLE
+
+        tli_edit.setOnClickListener {
+            listener.onEditClick(task)
+        }
+
+        tli_delete.setOnClickListener {
+            listener.onDeleteClick(task)
+        }
+
+        containerView.setOnLongClickListener {
+            listener.onTaskLongClick(task)
+            true
+        }
+    }
 }
 // EXPERIMENTAL USE FIND VIEW BY ID IN PRODUCTION CODE
 // GO TO FLICKR BROWSER APP FOR findViewByID examples
@@ -21,8 +40,14 @@ class TaskViewHolder ( override val containerView: View) :
 private const val TAG = "CursorRecyclerViewAdapt"
 
 
-class CursorRecyclerViewAdapter(private var cursor: Cursor?) :
+class CursorRecyclerViewAdapter(private var cursor: Cursor?, private val listener: OnTaskClickListener) :
         RecyclerView.Adapter<TaskViewHolder>() {
+
+    interface OnTaskClickListener {
+        fun onEditClick(task: Task)
+        fun onDeleteClick(task: Task)
+        fun onTaskLongClick(task: Task)
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskViewHolder {
         Log.d(TAG, "onCreateViewHolder: new view requested")
@@ -31,7 +56,6 @@ class CursorRecyclerViewAdapter(private var cursor: Cursor?) :
     }
 
     override fun onBindViewHolder(holder: TaskViewHolder, position: Int) {
-        Log.d(TAG,"onBindViewHolder: Starts")
         val cursor = cursor // avoid problem with smart cast
 
         if(cursor == null || cursor.count == 0) {
@@ -54,16 +78,12 @@ class CursorRecyclerViewAdapter(private var cursor: Cursor?) :
 
             task.id = cursor.getLong(cursor.getColumnIndex(TasksContract.Columns.ID))
 
-            holder.tli_name.text = task.name
-            holder.tli_description.text = task.description
-            holder.tli_edit.visibility = View.VISIBLE  //TODO: add on click
-            holder.tli_delete.visibility = View.VISIBLE //TODO: add on click
+        holder.bind(task, listener)
 
         }
     }
 
     override fun getItemCount(): Int {
-        Log.d(TAG,"getItemCount: starts")
         val cursor = cursor
         val count = if(cursor == null || cursor.count == 0) {
             1 // fib, because we populate a single ViewHolder with instructions
