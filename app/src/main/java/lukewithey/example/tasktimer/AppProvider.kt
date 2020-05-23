@@ -23,6 +23,9 @@ private const val TASKS_ID = 101
 private const val TIMINGS = 200
 private const val TIMINGS_ID = 201
 
+private const val CURRENT_TIMING = 300
+
+
 private const val TASK_DURATIONS = 400
 private const val TASK_DURATIONS_ID = 401
 
@@ -46,7 +49,11 @@ class AppProvider: ContentProvider() {
 
         matcher.addURI(CONTENT_AUTHORITY, TimingsContract.TABLE_NAME, TIMINGS)
         matcher.addURI(CONTENT_AUTHORITY, "${TimingsContract.TABLE_NAME}/#", TIMINGS_ID)
-//
+
+        matcher.addURI(CONTENT_AUTHORITY, CurrentTimingContract.TABLE_NAME, CURRENT_TIMING)
+
+
+
 //        matcher.addURI(CONTENT_AUTHORITY, DurationsContract.TABLE_NAME, TASK_DURATIONS)
 //        matcher.addURI(CONTENT_AUTHORITY, "${DurationsContract.TABLE_NAME}/#", TASK_DURATIONS_ID)
 
@@ -68,6 +75,8 @@ class AppProvider: ContentProvider() {
             TIMINGS -> TimingsContract.CONTENT_TYPE
 
             TIMINGS_ID -> TimingsContract.CONTENT_ITEM_TYPE
+
+            CURRENT_TIMING -> CurrentTimingContract.CONTENT_ITEM_TYPE
 //
 //            TASK_DURATIONS -> DurationsContract.CONTENT_TYPE
 //
@@ -107,6 +116,10 @@ class AppProvider: ContentProvider() {
                 val timingId = TimingsContract.getId(uri)
                 queryBuilder.appendWhereEscapeString("${TimingsContract.Columns.ID} = ")
                 queryBuilder.appendWhereEscapeString("$timingId")
+            }
+
+            CURRENT_TIMING -> {
+                queryBuilder.tables = CurrentTimingContract.TABLE_NAME
             }
 
 //            TASK_DURATIONS -> queryBuilder.tables = DurationsContract.TABLE_NAME

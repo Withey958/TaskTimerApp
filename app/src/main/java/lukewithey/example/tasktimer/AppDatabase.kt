@@ -12,7 +12,7 @@ import java.lang.IllegalStateException
 private const val TAG = "AppDatabase"
 
 private const val DATABASE_NAME = "TaskTimer.db"
-private const val DATABASE_VERSION = 1
+private const val DATABASE_VERSION = 3
 
 internal class AppDatabase private constructor(context: Context): SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
@@ -32,26 +32,82 @@ internal class AppDatabase private constructor(context: Context): SQLiteOpenHelp
             ${TasksContract.Columns.TASK_NAME} TEXT NOT NULL,
             ${TasksContract.Columns.TASK_DESCRIPTION} TEXT,
             ${TasksContract.Columns.TASK_SORT_ORDER} INTEGER);""".replaceIndent(" ")
-// Create second table Timings. Check second column...
-//        """CREATE TABLE ${TimingsContract.TABLE_NAME} (
-//            ${TimingsContract.Columns.ID} INTEGER PRIMARY KEY NOT NULL,
-//            ${TasksContract.Columns.ID} INTEGER NOT NULL,
-//            ${TimingsContract.Columns.TIMING_START_TIME} INTEGER NOT NULL,
-//            ${TimingsContract.Columns.TIMING_DURATION} INTEGER INTEGER NOT NULL);""".replaceIndent(" ")
-
         Log.d(TAG, sSQL)
-
         db.execSQL(sSQL)
+
+        addTimingsTable(db)
+        addCurrentTimingView(db)
     }
+
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         Log.d(TAG, "onUpgrade starts")
         when (oldVersion) {
             1 -> {
-                // upgrade logic from version 1
+                addTimingsTable(db) // upgrade logic from version 1
+                addCurrentTimingView(db)
+            }
+            2 -> {
+                addCurrentTimingView(db)
             }
             else -> throw IllegalStateException("onUpgrade() with unknown newVersion $newVersion")
         }
+    }
+
+    private fun addTimingsTable(db: SQLiteDatabase) {
+
+        // Create second table Timings. Check second column...
+        val sSQLTiming = """CREATE TABLE ${TimingsContract.TABLE_NAME} (
+            ${TimingsContract.Columns.ID} INTEGER PRIMARY KEY NOT NULL,
+            ${TimingsContract.Columns.TIMING_TASK_ID} INTEGER NOT NULL,
+            ${TimingsContract.Columns.TIMING_START_TIME} INTEGER,
+            ${TimingsContract.Columns.TIMING_DURATION} INTEGER);""".replaceIndent(" ")
+        Log.d(TAG, sSQLTiming)
+        db.execSQL(sSQLTiming)
+
+        // Create a trigger everytime a task is removed
+        val sSQLTrigger = """CREATE TRIGGER Remove_Task
+            AFTER DELETE ON ${TasksContract.TABLE_NAME}
+            FOR EACH ROW
+            BEGIN
+            DELETE FROM ${TimingsContract.TABLE_NAME}
+            WHERE ${TimingsContract.Columns.TIMING_TASK_ID} = OLD.${TasksContract.Columns.ID};
+        END;""".replaceIndent(" ")
+        Log.d(TAG, sSQLTrigger)
+        db.execSQL(sSQLTrigger)
+    }
+
+    private fun addCurrentTimingView (db: SQLiteDatabase) {
+        // create the view in our database in
+
+        /*
+CREATE VIEW vwCurrentTiming
+     AS SELECT Timings._id,
+         Timings.TaskId,
+         Timings.StartTime,
+         Tasks.Name
+     FROM Timings
+     JOIN Tasks
+     ON Timings.TaskId = Tasks._id
+     WHERE Timings.Duration = 0
+     ORDER BY Timings.StartTime DESC;
+ */
+
+        val sSQLCurrentTiming = """CREATE VIEW ${CurrentTimingContract.TABLE_NAME}
+        AS SELECT 
+            ${TimingsContract.TABLE_NAME}.${TimingsContract.Columns.ID},
+            ${TimingsContract.TABLE_NAME}.${TimingsContract.Columns.TIMING_TASK_ID},
+            ${TimingsContract.TABLE_NAME}.${TimingsContract.Columns.TIMING_START_TIME},
+            ${TasksContract.TABLE_NAME}.${TasksContract.Columns.TASK_NAME}
+        FROM ${TimingsContract.TABLE_NAME}
+        JOIN ${TasksContract.TABLE_NAME}
+        ON ${TimingsContract.TABLE_NAME}.${TimingsContract.Columns.TIMING_TASK_ID} = ${TasksContract.TABLE_NAME}.${TasksContract.Columns.ID}
+        WHERE ${TimingsContract.TABLE_NAME}.${TimingsContract.Columns.TIMING_DURATION} = 0
+        ORDER BY ${TimingsContract.TABLE_NAME}.${TimingsContract.Columns.TIMING_START_TIME} DESC;
+        """.replaceIndent(" ")
+
+        Log.d(TAG, sSQLCurrentTiming)
+        db.execSQL(sSQLCurrentTiming)
     }
 
     companion object : SingletonHolder<AppDatabase, Context>(::AppDatabase)

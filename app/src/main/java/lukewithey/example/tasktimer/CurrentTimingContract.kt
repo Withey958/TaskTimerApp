@@ -6,10 +6,10 @@ import android.provider.BaseColumns
 
 object CurrentTimingContract {
 
-    internal const val TABLE_NAME = "Timings"
+    internal const val TABLE_NAME = "vwCurrentTiming"
 
     /**
-     * The URI to access the Timings table
+     * The URI to access the CurrentTiming View
      */
     val CONTENT_URI: Uri = Uri.withAppendedPath(CONTENT_AUTHORITY_URI, TABLE_NAME)
 
@@ -18,17 +18,10 @@ object CurrentTimingContract {
 
     // Tasks fields
     object Columns {
-        const val ID = BaseColumns._ID
-        const val TIMING_TASK_ID = "TaskId"
-        const val TIMING_START_TIME = "StartTime"
-        const val TIMING_DURATION = "Duration"
+        const val TIMING_ID = TimingsContract.Columns.ID
+        const val TASK_ID = TimingsContract.Columns.TIMING_TASK_ID
+        const val START_TIME = TimingsContract.Columns.TIMING_START_TIME
+        const val TASK_NAME = TasksContract.Columns.TASK_NAME
     }
 
-    fun getId(uri: Uri): Long {
-        return ContentUris.parseId(uri)
-    }
-
-    fun buildUriFromId(id: Long): Uri {
-        return ContentUris.withAppendedId(CONTENT_URI, id)
-    }
 }
