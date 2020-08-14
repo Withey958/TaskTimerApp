@@ -14,6 +14,7 @@ import kotlin.system.measureNanoTime
 class TaskViewHolder ( override val containerView: View) :
         RecyclerView.ViewHolder(containerView),
         LayoutContainer {
+
     fun bind(task : Task, listener: CursorRecyclerViewAdapter.OnTaskClickListener) {
         tli_name.text = task.name
         tli_description.text = task.description
@@ -86,7 +87,7 @@ class CursorRecyclerViewAdapter(private var cursor: Cursor?, private val listene
     override fun getItemCount(): Int {
         val cursor = cursor
         val count = if(cursor == null || cursor.count == 0) {
-            1 // fib, because we populate a single ViewHolder with instructions
+            1 // fib, because we opulate a single ViewHolder with instructions
         } else {
             cursor.count
         }

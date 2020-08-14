@@ -35,7 +35,6 @@ class TaskTimerViewModel(application: Application) : AndroidViewModel(applicatio
         Log.d(TAG, "TaskTimerViewModel: created")
         getApplication<Application>().contentResolver.registerContentObserver(TasksContract.CONTENT_URI,
         true, contentObserver)
-
         currentTiming = retrieveTiming()
         loadTasks()
     }

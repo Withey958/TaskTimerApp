@@ -2,10 +2,7 @@ package lukewithey.example.tasktimer
 
 
 import android.annotation.SuppressLint
-import android.app.Activity
-import android.content.ContentValues
 import android.content.Context
-import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -15,7 +12,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import kotlinx.android.synthetic.main.fragment_add_edit.*
-import java.lang.RuntimeException
 
 private const val TAG = "AddEditFragment"
 
