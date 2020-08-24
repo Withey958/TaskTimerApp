@@ -3,8 +3,8 @@
 Shows priniciples learnt from Kotlin android course including:
 
 - SQLite
-- Content Provider
-- Fregaments
-- SVVM
+- Content Providers
+- Fragaments
+- MVVM
 - Time
 - much more
